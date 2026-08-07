@@ -1,4 +1,5 @@
 import 'dotenv/config';
+import { timingSafeEqual } from 'node:crypto';
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { StreamableHTTPServerTransport } from '@modelcontextprotocol/sdk/server/streamableHttp.js';
 import { createMcpExpressApp } from '@modelcontextprotocol/sdk/server/express.js';
@@ -9,6 +10,7 @@ const {
   AIRTABLE_BASE_ID,
   AIRTABLE_USERS_TABLE,
   AIRTABLE_RESERVATIONS_TABLE,
+  MCP_API_KEY,
   PORT = '3000',
 } = process.env;
 
@@ -21,6 +23,7 @@ function requireEnv() {
   if (!AIRTABLE_RESERVATIONS_TABLE) {
     missing.push('AIRTABLE_RESERVATIONS_TABLE');
   }
+  if (!MCP_API_KEY) missing.push('MCP_API_KEY');
 
   if (missing.length > 0) {
     throw new Error(
@@ -319,6 +322,27 @@ requireEnv();
 const app = createMcpExpressApp({
   host: '0.0.0.0',
 });
+
+function apiKeyAuth(req, res, next) {
+  if (req.path === '/') return next();
+
+  const provided = req.headers['x-api-key'];
+  const expected = MCP_API_KEY;
+
+  const providedBuf = Buffer.from(provided ?? '');
+  const expectedBuf = Buffer.from(expected);
+
+  if (
+    providedBuf.length !== expectedBuf.length ||
+    !timingSafeEqual(providedBuf, expectedBuf)
+  ) {
+    return res.status(401).json({ error: 'Unauthorized' });
+  }
+
+  next();
+}
+
+app.use(apiKeyAuth);
 
 app.get('/', (_req, res) => {
   res.json({
