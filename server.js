@@ -283,7 +283,7 @@ function createServer() {
                 'Confirmation Number':
                   confirmationNumber,
 
-                Users: [guest.id],
+                User: [guest.id],
 
                 Service: service,
 
