@@ -96,22 +96,61 @@ function createServer() {
             'Full guest name, for example Alex Morgan.'
           ),
       },
+      outputSchema: {
+        type: 'object',
+        properties: {
+          found: { type: 'boolean' },
+          recordId: { type: ['string', 'null'] },
+          name: { type: ['string', 'null'] },
+          guestType: { type: ['string', 'null'] },
+          dietaryPreference: { type: ['string', 'null'] },
+          activityPreference: { type: ['string', 'null'] },
+          roomPreference: { type: ['string', 'null'] },
+          language: { type: ['string', 'null'] },
+          mobile: { type: ['string', 'null'] },
+          email: { type: ['string', 'null'] },
+        },
+        required: [
+          'found',
+          'recordId',
+          'name',
+          'guestType',
+          'dietaryPreference',
+          'activityPreference',
+          'roomPreference',
+          'language',
+          'mobile',
+          'email',
+        ],
+        additionalProperties: false,
+      },
     },
     async ({ guestName }) => {
       try {
         const record = await findGuestByName(guestName);
 
         if (!record) {
+          const notFoundProfile = {
+            found: false,
+            recordId: null,
+            name: null,
+            guestType: null,
+            dietaryPreference: null,
+            activityPreference: null,
+            roomPreference: null,
+            language: null,
+            mobile: null,
+            email: null,
+          };
+
           return {
             content: [
               {
                 type: 'text',
-                text: JSON.stringify({
-                  found: false,
-                  message: `No guest profile found for ${guestName}.`,
-                }),
+                text: JSON.stringify(notFoundProfile),
               },
             ],
+            structuredContent: notFoundProfile,
           };
         }
 
@@ -201,6 +240,35 @@ function createServer() {
           .describe(
             'Optional reservation notes such as dietary preferences or pickup location.'
           ),
+      },
+      outputSchema: {
+        type: 'object',
+        properties: {
+          success: { type: 'boolean' },
+          reservationId: { type: ['string', 'null'] },
+          confirmationNumber: { type: 'string' },
+          guestName: { type: 'string' },
+          service: {
+            type: 'string',
+            enum: ['Dining', 'Activity', 'Transportation'],
+          },
+          serviceName: { type: 'string' },
+          date: { type: 'string' },
+          time: { type: 'string' },
+          status: { type: 'string' },
+        },
+        required: [
+          'success',
+          'reservationId',
+          'confirmationNumber',
+          'guestName',
+          'service',
+          'serviceName',
+          'date',
+          'time',
+          'status',
+        ],
+        additionalProperties: false,
       },
     },
     async ({
