@@ -107,6 +107,7 @@ function createServer() {
         language: z.string().nullable(),
         mobile: z.string().nullable(),
         email: z.string().nullable(),
+        welcomePhrase: z.string().nullable(),
       },
     },
     async ({ guestName }) => {
@@ -125,6 +126,7 @@ function createServer() {
             language: null,
             mobile: null,
             email: null,
+            welcomePhrase: null,
           };
 
           return {
@@ -154,6 +156,7 @@ function createServer() {
           language: fields.Language ?? null,
           mobile: fields.Mobile ?? null,
           email: fields.Email ?? null,
+          welcomePhrase: fields['Welcome Phrase'] ?? null,
         };
 
         return {
